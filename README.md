@@ -1,4 +1,4 @@
-Developer Profile Generator
+Developer Profile Generator # This is an <h1> tag
 Description
 A command-line application that uses a user-entered GitHub username and color scheme to dynamically generate a profile in an HTML webpage and a PDF file. Intended for use by developers who need to quickly prepare multiple profiles.
 
