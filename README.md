@@ -1,4 +1,5 @@
 # <h1> Developer Profile Generator 
+  ![DEV Profile Generator Animation](https://user-images.githubusercontent.com/57078118/72674975-b01efb00-3a4b-11ea-9adb-88650341faaa.gif)
 # <h1> Description
 A command-line application that uses a user-entered GitHub username and color scheme to dynamically generate a profile in an HTML webpage and a PDF file. Intended for use by developers who need to quickly prepare multiple profiles.
 
