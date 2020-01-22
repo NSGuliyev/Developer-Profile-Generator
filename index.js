@@ -1,8 +1,12 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
 const axios = require("axios");
-var pdf = require('html-pdf');
-var options = { format: 'Letter' };
+// var pdf = require('html-pdf');
+// var options = { format: 'Letter' };
+const puppeteer = require("puppeteer");
+let stars = 0;
+
+
 
 function promptUser() {
   return inquirer.prompt([
@@ -18,20 +22,51 @@ function promptUser() {
     }
   ]).then((answers) => {
     console.log(answers);
+
     axios
       .get(`https://api.github.com/users/${answers.GitHub}`)
       .then(function (res) {
         // console.log(res.data);
-        var html = generateHtml(res.data,answers.color);
-        console.log(html);
-        // fs.writeFile("test.html", html, function (err) {
-        //   if (err) throw err;
-        //   console.log("HTML is created !");
-        // })
-        pdf.create(html, options).toFile('./Profile.pdf', function(err, res) {
-          if (err) return console.log(err);
-          console.log(res); // { filename: '/app/businesscard.pdf' }
-        });
+
+
+        axios
+          .get(`https://api.github.com/users/${answers.GitHub}/repos?per_page=100`)
+          .then(function (rese) {
+            let data = rese.data;
+            for (let i = 0; i < data.length; i++) { stars = stars + data[i].stargazers_count }
+            var html = generateHtml(res.data, answers.color);
+            console.log(html);
+
+
+
+
+
+            // fs.writeFile("test.html", html, function (err) {
+            //   if (err) throw err;
+            //   console.log("HTML is created !");
+            // })
+            // pdf.create(html, options).toFile('./Profile.pdf', function(err, res) {
+            //   if (err) return console.log(err);
+            //   console.log(res); // { filename: '/app/businesscard.pdf' }
+            // });
+            (async function () {
+              try {
+                const browser = await puppeteer.launch();
+                const page = await browser.newPage();
+                await page.setContent(html);
+                await page.emulateMedia('screen');
+                await page.pdf({ path: 'Profile.pdf', format: 'A4', printBackground: true });
+                await browser.close();
+                console.log('PDF file has been generated using Puppeteer!!!!');
+                process.exit();
+
+              } catch (err) {
+
+                console.log(err);
+
+              }
+            })();
+          });
       });
   });
 }
@@ -49,7 +84,7 @@ promptUser()
 
 
 
-function generateHtml(data,color) {
+function generateHtml(data, color) {
   console.log(data);
   return `
 <!DOCTYPE html>
@@ -102,8 +137,7 @@ function generateHtml(data,color) {
     </div>
     <div class="row justify-content-center">
       <nav class="nav">
-        <a class="nav-link active" href="#"><i class="fas fa-location-arrow fa-lg white-text mr-md- mr- fa-1x"></i>
-          ${data.location}</a>
+        <a class="nav-link active" href="https://www.google.com/maps/search/?api=1&query=${data.location}G"><i class="fas fa-location-arrow fa-lg white-text mr-md- mr- fa-1x"></i>${data.location}</a>
         <a class="nav-link" href="${data.html_url}"><i class="fab fa-github fa-lg white-text mr-md- mr- fa-1x"></i> GitHub</a>
         <a class="nav-link" href="#"><i class="fas fa-rss fa-lg white-text mr-md- mr- fa-1x"></i> Blog</a>
       </nav>
@@ -126,7 +160,7 @@ function generateHtml(data,color) {
     <div class="row space">
       <div class="col-sm-6">
         <h3>Github Stars</h3>
-        <h3>Github Stars</h3>
+        <h3>${stars}</h3>
       </div>
       <div class="col-sm-6">
         <h3>Following</h3>
